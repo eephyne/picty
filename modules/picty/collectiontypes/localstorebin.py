@@ -70,10 +70,10 @@ def update_legacy_item(item,image_dir):
     return new_item
 
 
-class NamingTemplate(string.Template):
-    def __init__(self,template):
-        t=template.replace("<","${").replace(">","}")
-        string.Template.__init__(self,t)
+#class NamingTemplate(string.Template):
+#    def __init__(self,template):
+#        t=template.replace("<","${").replace(">","}")
+#        string.Template.__init__(self,t)
 
 def get_date(item):
     '''
@@ -85,30 +85,30 @@ def get_date(item):
     else:
         return result
 
-def get_year(item):
-    '''
-    returns 4 digit year as string
-    '''
-    return '%04i'%get_date(item).year
-
-def get_month(item):
-    '''
-    returns 2 digit month as string
-    '''
-    return '%02i'%get_date(item).month
-
-def get_day(item):
-    '''
-    returns 2 digit day as string
-    '''
-    return '%02i'%get_date(item).day
-
-def get_datetime(item):
-    '''
-    returns a datetime string of the form "YYYYMMDD-HHMMSS"
-    '''
-    d=get_date(item)
-    return '%04i%02i%02i-%02i%02i%02i'%(d.year,d.month,d.day,d.hour,d.minute,d.day)
+#def get_year(item):
+#    '''
+#    returns 4 digit year as string
+#    '''
+#    return '%04i'%get_date(item).year
+#
+#def get_month(item):
+#    '''
+#    returns 2 digit month as string
+#    '''
+#    return '%02i'%get_date(item).month
+#
+#def get_day(item):
+#    '''
+#    returns 2 digit day as string
+#    '''
+#    return '%02i'%get_date(item).day
+#
+#def get_datetime(item):
+#    '''
+#    returns a datetime string of the form "YYYYMMDD-HHMMSS"
+#    '''
+#    d=get_date(item)
+#    return '%04i%02i%02i-%02i%02i%02i'%(d.year,d.month,d.day,d.hour,d.minute,d.day)
 
 def get_original_name(item):
     '''
@@ -118,18 +118,18 @@ def get_original_name(item):
     return os.path.splitext(os.path.split(item.uid)[1])[0]
 
 
-class VariableExpansion:
-    def __init__(self,item):
-        self.item=item
-        self.variables={
-            'Year':get_year,
-            'Month':get_month,
-            'Day':get_day,
-            'DateTime':get_datetime,
-            'ImageName':get_original_name,
-            }
-    def __getitem__(self,variable):
-        return self.variables[variable](self.item)
+#class VariableExpansion:
+#    def __init__(self,item):
+#        self.item=item
+#        self.variables={
+#            'Year':get_year,
+#            'Month':get_month,
+#            'Day':get_day,
+#            'DateTime':get_datetime,
+#            'ImageName':get_original_name,
+#            }
+#    def __getitem__(self,variable):
+#        return self.variables[variable](self.item)
 
 #def naming_default(item,dest_dir_base):
 #    '''
@@ -138,17 +138,18 @@ class VariableExpansion:
 #    return dest_dir_base,os.path.split(item.uid)[1]
 
 def name_item(item,dest_base_dir,naming_scheme):
-    subpath=NamingTemplate(naming_scheme).substitute(VariableExpansion(item))
+    #subpath=NamingTemplate(naming_scheme).substitute(VariableExpansion(item))
+    subpath=get_date(item).strftime(naming_scheme).replace("<ImageName>",get_original_name(item))
     ext=os.path.splitext(item.uid)[1]
     fullpath=os.path.join(dest_base_dir,subpath+ext)
     return os.path.split(fullpath)
 
 naming_schemes=[
     ("<ImageName>","<ImageName>",False),
-    ("<Year>/<Month>/<ImageName>","<Year>/<Month>/<ImageName>",True),
-    ("<Y>/<M>/<DateTime>-<ImageName>","<Year>/<Month>/<DateTime>-<ImageName>",True),
-    ("<Y>/<M>/<Day>/<ImageName>","<Year>/<Month>/<Day>/<ImageName>",True),
-    ("<Y>/<M>/<Day>/<DateTime>-<ImageName>","<Year>/<Month>/<Day>/<DateTime>-<ImageName>",True),
+    ("<Year>/<Month>/<ImageName>","%Y/%m/<ImageName>",True),
+    ("<Y>/<M>/<DateTime>-<ImageName>","%Y/%m/%Y%m%d-%H%M%S-<ImageName>",True),
+    ("<Y>/<M>/<Day>/<ImageName>","%Y/%m/%d/<ImageName>",True),
+    ("<Y>/<M>/<Day>/<DateTime>-<ImageName>","%Y/%m/%d/%Y%m%d-%H%M%S-<ImageName>",True),
     ]
 
 def altname(pathname):
